@@ -3,7 +3,7 @@ services:
     build: .
     command:
       - --database-type=postgres
-      - --database-url=postgresql://bmstream:fKYRoven6XPLG6t5iLX5WyrJ5ZzhbS@@154.53.37.231:5432/authorizer_local?sslmode=disable
+      - --database-url=postgresql://bmstream:fKYRoven6XPLG6t5iLX5WyrJ5ZzhbS@154.53.37.231:5432/authorizer_local?sslmode=disable
       - --redis-url=redis://default:tqaQP9VKznrA2xc%25m%25b6JV3vZN4eH@154.53.37.231:6379/12
       - --jwt-type=HS256
       - --jwt-secret=jld0sfnphywrmelyhctnxn5vuzhrqgyl
