@@ -13,5 +13,5 @@ services:
       - --client-id=123456
       - --client-secret=secret
       - --enable-playground=false
-    ports:
-      - 8080:8080
+    expose:
+      - "8080"
