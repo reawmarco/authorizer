@@ -1,17 +1,22 @@
 services:
+  # Configure these in Dokploy Environment:
+  # DATABASE_URL, REDIS_URL, JWT_SECRET, ADMIN_SECRET, CLIENT_ID, CLIENT_SECRET
   authorizer:
     build: .
+    restart: unless-stopped
     entrypoint:
       - ./authorizer
     command:
-      - --database-type=postgres
-      - --database-url=postgresql://bmstream:fKYRoven6XPLG6t5iLX5WyrJ5ZzhbS@@154.53.37.231:5432/authorizer_local?sslmode=disable
-      - --redis-url=redis://default:tqaQP9VKznrA2xc%25m%25b6JV3vZN4eH@154.53.37.231:6379/12
-      - --jwt-type=HS256
-      - --jwt-secret=jld0sfnphywrmelyhctnxn5vuzhrqgyl
-      - --admin-secret=1wfgiyaim48opwcwsqprsibsyvb6lzks
-      - --client-id=123456
-      - --client-secret=secret
-      - --enable-playground=false
+      - "--database-type=${DATABASE_TYPE:-postgres}"
+      - "--database-url=${DATABASE_URL:?DATABASE_URL is required}"
+      - "--redis-url=${REDIS_URL:?REDIS_URL is required}"
+      - "--jwt-type=${JWT_TYPE:-HS256}"
+      - "--jwt-secret=${JWT_SECRET:?JWT_SECRET is required}"
+      - "--admin-secret=${ADMIN_SECRET:?ADMIN_SECRET is required}"
+      - "--client-id=${CLIENT_ID:?CLIENT_ID is required}"
+      - "--client-secret=${CLIENT_SECRET:?CLIENT_SECRET is required}"
+      - "--enable-playground=${ENABLE_PLAYGROUND:-false}"
+      - "--app-cookie-secure=${APP_COOKIE_SECURE:-true}"
+      - "--admin-cookie-secure=${ADMIN_COOKIE_SECURE:-true}"
     expose:
       - "8080"
