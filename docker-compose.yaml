@@ -6,6 +6,8 @@ services:
   authorizer:
     build: .
     restart: unless-stopped
+    environment:
+      GIN_MODE: "${GIN_MODE:-release}"
     entrypoint:
       - ./authorizer
     command:

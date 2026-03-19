@@ -10,6 +10,8 @@ import (
 // NewRouter creates new gin router
 func (s *server) NewRouter() *gin.Engine {
 	router := gin.New()
+	// Secure default: do not trust X-Forwarded-* headers from arbitrary proxies.
+	_ = router.SetTrustedProxies(nil)
 	router.Use(gin.Recovery())
 
 	router.Use(s.Dependencies.HTTPProvider.LoggerMiddleware())
