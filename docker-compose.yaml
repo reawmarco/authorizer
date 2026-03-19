@@ -1,6 +1,8 @@
 services:
   # Configure these in Dokploy Environment:
   # DATABASE_URL, REDIS_URL, JWT_SECRET, ADMIN_SECRET, CLIENT_ID, CLIENT_SECRET
+  # Optional Gmail SMTP: SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD,
+  # SMTP_SENDER_EMAIL, SMTP_SENDER_NAME, SMTP_LOCAL_NAME, SMTP_SKIP_TLS_VERIFICATION
   authorizer:
     build: .
     restart: unless-stopped
@@ -18,5 +20,13 @@ services:
       - "--enable-playground=${ENABLE_PLAYGROUND:-false}"
       - "--app-cookie-secure=${APP_COOKIE_SECURE:-true}"
       - "--admin-cookie-secure=${ADMIN_COOKIE_SECURE:-true}"
+      - "--smtp-host=${SMTP_HOST:-smtp.gmail.com}"
+      - "--smtp-port=${SMTP_PORT:-587}"
+      - "--smtp-username=${SMTP_USERNAME:-}"
+      - "--smtp-password=${SMTP_PASSWORD:-}"
+      - "--smtp-sender-email=${SMTP_SENDER_EMAIL:-}"
+      - "--smtp-sender-name=${SMTP_SENDER_NAME:-Authorizer}"
+      - "--smtp-local-name=${SMTP_LOCAL_NAME:-}"
+      - "--smtp-skip-tls-verification=${SMTP_SKIP_TLS_VERIFICATION:-false}"
     expose:
       - "8080"
