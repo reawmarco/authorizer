@@ -233,16 +233,14 @@ func (g *graphqlProvider) SignUp(ctx context.Context, params *model.SignUpReques
 			log.Debug().Err(err).Msg("Failed to add verification request")
 			return nil, err
 		}
-		// exec it as go routine so that we can reduce the api latency
-		go func() {
-			// exec it as go routine so that we can reduce the api latency
-			g.EmailProvider.SendEmail([]string{email}, constants.VerificationTypeBasicAuthSignup, map[string]interface{}{
-				"user":             user.ToMap(),
-				"organization":     utils.GetOrganization(g.Config),
-				"verification_url": utils.GetEmailVerificationURL(verificationToken, hostname, redirectURL),
-			})
-			g.EventsProvider.RegisterEvent(ctx, constants.UserCreatedWebhookEvent, constants.AuthRecipeMethodBasicAuth, user)
-		}()
+		if err := g.sendTransactionalEmail([]string{email}, constants.VerificationTypeBasicAuthSignup, map[string]interface{}{
+			"user":             user.ToMap(),
+			"organization":     utils.GetOrganization(g.Config),
+			"verification_url": utils.GetEmailVerificationURL(verificationToken, hostname, redirectURL),
+		}); err != nil {
+			return nil, err
+		}
+		g.EventsProvider.RegisterEvent(ctx, constants.UserCreatedWebhookEvent, constants.AuthRecipeMethodBasicAuth, user)
 
 		return &model.AuthResponse{
 			Message: `Verification email has been sent. Please check your inbox`,

@@ -37,6 +37,10 @@ func (g *graphqlProvider) ResendVerifyEmail(ctx context.Context, params *model.R
 		log.Debug().Msg("Invalid verification identifier")
 		return nil, fmt.Errorf("invalid identifier")
 	}
+	if !g.Config.IsEmailServiceEnabled {
+		log.Debug().Msg("Email service is not enabled")
+		return nil, fmt.Errorf("email sending is disabled for this instance")
+	}
 
 	user, err := g.StorageProvider.GetUserByEmail(ctx, params.Email)
 	if err != nil {
@@ -84,12 +88,13 @@ func (g *graphqlProvider) ResendVerifyEmail(ctx context.Context, params *model.R
 		log.Debug().Err(err).Msg("Failed to add verification request")
 	}
 
-	// exec it as go routine so that we can reduce the api latency
-	go g.EmailProvider.SendEmail([]string{params.Email}, params.Identifier, map[string]interface{}{
+	if err := g.sendTransactionalEmail([]string{params.Email}, params.Identifier, map[string]interface{}{
 		"user":             user.ToMap(),
 		"organization":     utils.GetOrganization(g.Config),
 		"verification_url": utils.GetEmailVerificationURL(verificationToken, hostname, verificationRequest.RedirectURI),
-	})
+	}); err != nil {
+		return nil, err
+	}
 
 	return &model.Response{
 		Message: `Verification email has been sent. Please check your inbox`,

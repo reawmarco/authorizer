@@ -312,6 +312,8 @@ func runRoot(c *cobra.Command, args []string) {
 	// Derive IsEmailServiceEnabled from SMTP config
 	rootArgs.config.IsEmailServiceEnabled = strings.TrimSpace(rootArgs.config.SMTPHost) != "" &&
 		rootArgs.config.SMTPPort > 0 &&
+		strings.TrimSpace(rootArgs.config.SMTPUsername) != "" &&
+		strings.TrimSpace(rootArgs.config.SMTPPassword) != "" &&
 		strings.TrimSpace(rootArgs.config.SMTPSenderEmail) != ""
 
 	// Derive IsSMSServiceEnabled from Twilio config

@@ -242,12 +242,13 @@ func (g *graphqlProvider) UpdateProfile(ctx context.Context, params *model.Updat
 				return nil, err
 			}
 
-			// exec it as go routine so that we can reduce the api latency
-			go g.EmailProvider.SendEmail([]string{refs.StringValue(user.Email)}, verificationType, map[string]interface{}{
+			if err := g.sendTransactionalEmail([]string{refs.StringValue(user.Email)}, verificationType, map[string]interface{}{
 				"user":             user.ToMap(),
 				"organization":     utils.GetOrganization(g.Config),
 				"verification_url": utils.GetEmailVerificationURL(verificationToken, hostname, redirectURL),
-			})
+			}); err != nil {
+				return nil, err
+			}
 
 		}
 	}

@@ -71,6 +71,10 @@ func (g *graphqlProvider) ForgotPassword(ctx context.Context, params *model.Forg
 		return nil, fmt.Errorf(`user access has been revoked`)
 	}
 	if isEmailLogin {
+		if !g.Config.IsEmailServiceEnabled {
+			log.Debug().Msg("Email service is not enabled")
+			return nil, fmt.Errorf("email sending is disabled for this instance")
+		}
 		redirectURI := ""
 		// give higher preference to params redirect uri
 		if strings.TrimSpace(refs.StringValue(params.RedirectURI)) != "" {
@@ -105,12 +109,13 @@ func (g *graphqlProvider) ForgotPassword(ctx context.Context, params *model.Forg
 			log.Debug().Err(err).Msg("Failed to add verification request")
 			return nil, err
 		}
-		// execute it as go routine so that we can reduce the api latency
-		go g.EmailProvider.SendEmail([]string{email}, constants.VerificationTypeForgotPassword, map[string]interface{}{
+		if err := g.sendTransactionalEmail([]string{email}, constants.VerificationTypeForgotPassword, map[string]interface{}{
 			"user":             user.ToMap(),
 			"organization":     utils.GetOrganization(g.Config),
 			"verification_url": utils.GetForgotPasswordURL(verificationToken, redirectURI),
-		})
+		}); err != nil {
+			return nil, err
+		}
 		return &model.ForgotPasswordResponse{
 			Message: `Please check your inbox! We have sent a password reset link.`,
 		}, nil
